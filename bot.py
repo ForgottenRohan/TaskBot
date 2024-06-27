@@ -1,8 +1,15 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext
+from tenacity import retry, stop_after_attempt, wait_exponential
 from conf import TOKEN
 # Список для хранения задач
 tasks = []
+
+
+# Retry configuration
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+async def send_message_with_retry(context, chat_id, text):
+    await context.bot.send_message(chat_id=chat_id, text=text)
 
 # Обработчик команды /start
 async def start(update: Update, context: CallbackContext) -> None:
@@ -52,8 +59,7 @@ def main() -> None:
     token = TOKEN
 
     # Создаем приложение
-    application = ApplicationBuilder().token(token).request_kwargs({'timeout': 30}).build()
-
+    application = ApplicationBuilder().token(token).build()
     # Регистрируем обработчики команд
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("add", add_task))

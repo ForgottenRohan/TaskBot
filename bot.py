@@ -52,7 +52,7 @@ def main() -> None:
     token = TOKEN
 
     # Создаем приложение
-    application = ApplicationBuilder().token(token).build()
+    application = ApplicationBuilder().token(token).request_kwargs({'timeout': 30}).build()
 
     # Регистрируем обработчики команд
     application.add_handler(CommandHandler("start", start))
